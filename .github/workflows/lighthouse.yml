@@ -1,0 +1,58 @@
+name: Lighthouse CI for URL and Slack Notification
+
+on:
+  workflow_dispatch: # Allows you to manually trigger the workflow from the Actions tab
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+#  schedule:
+#    - cron: '0 12 * * *' # Runs daily at 12:00 UTC
+
+jobs:
+  lighthouse-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.9.x
+
+      - name: Run Lighthouse CI against URL
+        id: lighthouse
+        run: |
+          lhci collect --url=https://briebug.com --output-path=./lighthouse-report
+          lhci upload --target=temporary-public-storage --output-path=./lighthouse-report/lhr-*.report.json
+
+      - name: Extract Lighthouse Scores
+        id: extract_scores
+        run: |
+          export PERFORMANCE=$(cat ./lighthouse-report/lhr-*.report.json | jq '.categories.performance.score * 100')
+          export ACCESSIBILITY=$(cat ./lighthouse-report/lhr-*.report.json | jq '.categories.accessibility.score * 100')
+          export BEST_PRACTICES=$(cat ./lighthouse-report/lhr-*.report.json | jq '.categories."best-practices".score * 100')
+          export SEO=$(cat ./lighthouse-report/lhr-*.report.json | jq '.categories.seo.score * 100')
+          echo "PERFORMANCE=$PERFORMANCE" >> $GITHUB_ENV
+          echo "ACCESSIBILITY=$ACCESSIBILITY" >> $GITHUB_ENV
+          echo "BEST_PRACTICES=$BEST_PRACTICES" >> $GITHUB_ENV
+          echo "SEO=$SEO" >> $GITHUB_ENV
+
+      - name: Post to Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          PERFORMANCE: ${{ env.PERFORMANCE }}
+          ACCESSIBILITY: ${{ env.ACCESSIBILITY }}
+          BEST_PRACTICES: ${{ env.BEST_PRACTICES }}
+          SEO: ${{ env.SEO }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data "{
+            \"text\": \"Lighthouse CI Report for https://your-url.com:\nPerformance: $PERFORMANCE\nAccessibility: $ACCESSIBILITY\nBest Practices: $BEST_PRACTICES\nSEO: $SEO\"
+          }" $SLACK_WEBHOOK_URL
