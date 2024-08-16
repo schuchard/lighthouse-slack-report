@@ -34,7 +34,9 @@ jobs:
           lhci upload --target=filesystem --outputDir="$REPORT_PATH"
 
       - name: List files in lighthouse-report directory
-        run: ls -la $REPORT_PATH
+        run: |
+          ls -la $REPORT_PATH
+          jq '. | pretty' $REPORT_PATH/manifest.json
 
       - name: Extract Lighthouse Scores
         id: extract_scores
