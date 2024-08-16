@@ -26,7 +26,7 @@ jobs:
 
       - name: Run Lighthouse against URL
         run: |
-          REPORT_PATH=$(mktemp -d)/lighthouse.manifest.json
+          REPORT_PATH=$(mktemp -d)
           npm i -g @lhci/cli
           lhci collect --url=https://briebug.com --outputDir=$REPORT_PATH
           lhci upload --target=temporary-public-storage
@@ -35,9 +35,9 @@ jobs:
       - name: Extract Lighthouse Scores
         id: extract_scores
         run: |
-          export PERFORMANCE=$(jq '.categories.performance.score * 100' ${{ env.REPORT_PATH }})
-          export ACCESSIBILITY=$(jq '.categories.accessibility.score * 100' ${{ env.REPORT_PATH }})
-          export BEST_PRACTICES=$(jq '.categories."best-practices".score * 100' ${{ env.REPORT_PATH }})
+          export PERFORMANCE=$(jq '.categories.performance.score * 100' ${{ env.REPORT_PATH }}/manifest.json)
+          export ACCESSIBILITY=$(jq '.categories.accessibility.score * 100' ${{ env.REPORT_PATH }}/manifest.json)
+          export BEST_PRACTICES=$(jq '.categories."best-practices".score * 100' ${{ env.REPORT_PATH }}/manifest.json)
           export SEO=$(jq '.categories.seo.score * 100' ${{ env.REPORT_PATH }})
           echo "PERFORMANCE=$PERFORMANCE" >> $GITHUB_ENV
           echo "ACCESSIBILITY=$ACCESSIBILITY" >> $GITHUB_ENV
