@@ -24,21 +24,19 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Run Lighthouse CI against URL
-        id: lighthouse
+      - name: Run Lighthouse against URL
         run: |
-          npx lighthouse https://briebug.com --output=json --output-path=./lighthouse-report/lighthouse.report.json --chrome-flags="--headless"
-
-      - name: Debug List files in lighthouse-report directory
-        run: ls -la ./lighthouse-report
+          REPORT_PATH=$(mktemp -d)/lighthouse.report.json
+          npx lighthouse https://briebug.com --output=json --output-path=$REPORT_PATH
+          echo "REPORT_PATH=$REPORT_PATH" >> $GITHUB_ENV
 
       - name: Extract Lighthouse Scores
         id: extract_scores
         run: |
-          export PERFORMANCE=$(jq '.categories.performance.score * 100' ./lighthouse-report/lighthouse.report.json)
-          export ACCESSIBILITY=$(jq '.categories.accessibility.score * 100' ./lighthouse-report/lighthouse.report.json)
-          export BEST_PRACTICES=$(jq '.categories."best-practices".score * 100' ./lighthouse-report/lighthouse.report.json)
-          export SEO=$(jq '.categories.seo.score * 100' ./lighthouse-report/lighthouse.report.json)
+          export PERFORMANCE=$(jq '.categories.performance.score * 100' ${{ env.REPORT_PATH }})
+          export ACCESSIBILITY=$(jq '.categories.accessibility.score * 100' ${{ env.REPORT_PATH }})
+          export BEST_PRACTICES=$(jq '.categories."best-practices".score * 100' ${{ env.REPORT_PATH }})
+          export SEO=$(jq '.categories.seo.score * 100' ${{ env.REPORT_PATH }})
           echo "PERFORMANCE=$PERFORMANCE" >> $GITHUB_ENV
           echo "ACCESSIBILITY=$ACCESSIBILITY" >> $GITHUB_ENV
           echo "BEST_PRACTICES=$BEST_PRACTICES" >> $GITHUB_ENV
@@ -53,5 +51,5 @@ jobs:
           SEO: ${{ env.SEO }}
         run: |
           curl -X POST -H 'Content-type: application/json' --data "{
-            \"text\": \"Lighthouse CI Report for https://briebug.com:\nPerformance: $PERFORMANCE\nAccessibility: $ACCESSIBILITY\nBest Practices: $BEST_PRACTICES\nSEO: $SEO\"
+            \"text\": \"Lighthouse Report for https://your-url.com:\nPerformance: $PERFORMANCE\nAccessibility: $ACCESSIBILITY\nBest Practices: $BEST_PRACTICES\nSEO: $SEO\"
           }" $SLACK_WEBHOOK_URL
