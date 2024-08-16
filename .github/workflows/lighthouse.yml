@@ -24,14 +24,10 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install Lighthouse CI
-        run: npm install -g @lhci/cli@0.9.x
-
       - name: Run Lighthouse CI against URL
         id: lighthouse
         run: |
-          lhci collect --url=https://briebug.com --output-path=./lighthouse-report
-          lhci upload --target=temporary-public-storage --output-path=./lighthouse-report/lighthouse.report.json
+          npx lighthouse https://briebug.com --output=json --output-path=./lighthouse-report/lighthouse.report.json --chrome-flags="--headless"
 
       - name: Debug List files in lighthouse-report directory
         run: ls -la ./lighthouse-report
