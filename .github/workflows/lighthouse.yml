@@ -24,18 +24,12 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Chrome
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo dpkg -i google-chrome-stable_current_amd64.deb
-          sudo apt-get -f install
-
       - name: Run Lighthouse against URL
         run: |
           REPORT_PATH=$(mktemp -d)/lighthouse.report.json
-          npx lighthouse https://briebug.com --output=json --output-path=$REPORT_PATH
+          npm i -g @lhci/cli
+          lhci collect --url=https://briebug.com --output-path=$REPORT_PATH
+          lhci upload --target=$REPORT_PATH
           echo "REPORT_PATH=$REPORT_PATH" >> $GITHUB_ENV
 
       - name: Extract Lighthouse Scores
