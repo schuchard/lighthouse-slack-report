@@ -22,12 +22,19 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '20'
+
+      - name: Install Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i google-chrome-stable_current_amd64.deb
+          sudo apt-get -f install
 
       - name: Run Lighthouse against URL
         run: |
           REPORT_PATH=$(mktemp -d)/lighthouse.report.json
-          npx @puppeteer/browsers install chrome@stable
           npx lighthouse https://briebug.com --output=json --output-path=$REPORT_PATH
           echo "REPORT_PATH=$REPORT_PATH" >> $GITHUB_ENV
 
