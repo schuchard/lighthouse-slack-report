@@ -29,7 +29,7 @@ jobs:
           REPORT_PATH=$(mktemp -d)/lighthouse.report.json
           npm i -g @lhci/cli
           lhci collect --url=https://briebug.com --output-path=$REPORT_PATH
-          lhci upload --target=$REPORT_PATH
+          lhci upload --target=temporary-public-storage
           echo "REPORT_PATH=$REPORT_PATH" >> $GITHUB_ENV
 
       - name: Extract Lighthouse Scores
