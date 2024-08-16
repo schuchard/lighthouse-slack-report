@@ -1,0 +1,58 @@
+name: Lighthouse CI and Slack Notification
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lighthouse-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Lighthouse CI
+        id: lighthouse
+        run: |
+          npm install -g @lhci/cli@0.9.x
+          lhci autorun --upload.target=temporary-public-storage --output=json --output-path=./lighthouse.json
+
+      - name: Extract Lighthouse Scores
+        id: extract_scores
+        run: |
+          export PERFORMANCE=$(cat ./lighthouse.json | jq '.[].categories.performance.score * 100')
+          export ACCESSIBILITY=$(cat ./lighthouse.json | jq '.[].categories.accessibility.score * 100')
+          export BEST_PRACTICES=$(cat ./lighthouse.json | jq '.[].categories."best-practices".score * 100')
+          export SEO=$(cat ./lighthouse.json | jq '.[].categories.seo.score * 100')
+          export LHCI_URL=$(lhci healthcheck --upload.target=temporary-public-storage | grep 'View the full report at' | awk '{print $6}')
+          echo "PERFORMANCE=$PERFORMANCE" >> $GITHUB_ENV
+          echo "ACCESSIBILITY=$ACCESSIBILITY" >> $GITHUB_ENV
+          echo "BEST_PRACTICES=$BEST_PRACTICES" >> $GITHUB_ENV
+          echo "SEO=$SEO" >> $GITHUB_ENV
+          echo "LHCI_URL=$LHCI_URL" >> $GITHUB_ENV
+
+      - name: Post to Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          PERFORMANCE: ${{ env.PERFORMANCE }}
+          ACCESSIBILITY: ${{ env.ACCESSIBILITY }}
+          BEST_PRACTICES: ${{ env.BEST_PRACTICES }}
+          SEO: ${{ env.SEO }}
+          LHCI_URL: ${{ env.LHCI_URL }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data "{
+            \"text\": \"Lighthouse CI Report:\nPerformance: $PERFORMANCE\nAccessibility: $ACCESSIBILITY\nBest Practices: $BEST_PRACTICES\nSEO: $SEO\nReport URL: $LHCI_URL\"
+          }" $SLACK_WEBHOOK_URL
