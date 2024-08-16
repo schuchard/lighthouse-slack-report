@@ -31,6 +31,8 @@ jobs:
           lhci collect --url=https://briebug.com --outputDir=./$REPORT_PATH
           lhci upload --target=temporary-public-storage
           echo "REPORT_PATH=$REPORT_PATH" >> $GITHUB_ENV
+      - name: List files in lighthouse-report directory
+        run: ls -la $REPORT_PATH
 
       - name: Extract Lighthouse Scores
         id: extract_scores
@@ -53,5 +55,6 @@ jobs:
           SEO: ${{ env.SEO }}
         run: |
           curl -X POST -H 'Content-type: application/json' --data "{
-            \"text\": \"Lighthouse Report for https://your-url.com:\nPerformance: $PERFORMANCE\nAccessibility: $ACCESSIBILITY\nBest Practices: $BEST_PRACTICES\nSEO: $SEO\"
+            \"text\": \"Lighthouse Report for https://briebug.com:\nPerformance: $PERFORMANCE\nAccessibility: $ACCESSIBILITY\nBest Practices: $BEST_PRACTICES\nSEO: $SEO\"
           }" $SLACK_WEBHOOK_URL
+
