@@ -31,15 +31,18 @@ jobs:
         id: lighthouse
         run: |
           lhci collect --url=https://briebug.com --output-path=./lighthouse-report
-          lhci upload --target=temporary-public-storage --output-path=./lighthouse-report/lhr-*.report.json
+          lhci upload --target=temporary-public-storage --output-path=./lighthouse-report/lighthouse.report.json
+
+      - name: Debug List files in lighthouse-report directory
+        run: ls -la ./lighthouse-report
 
       - name: Extract Lighthouse Scores
         id: extract_scores
         run: |
-          export PERFORMANCE=$(cat ./lighthouse-report/lhr-*.report.json | jq '.categories.performance.score * 100')
-          export ACCESSIBILITY=$(cat ./lighthouse-report/lhr-*.report.json | jq '.categories.accessibility.score * 100')
-          export BEST_PRACTICES=$(cat ./lighthouse-report/lhr-*.report.json | jq '.categories."best-practices".score * 100')
-          export SEO=$(cat ./lighthouse-report/lhr-*.report.json | jq '.categories.seo.score * 100')
+          export PERFORMANCE=$(jq '.categories.performance.score * 100' ./lighthouse-report/lighthouse.report.json)
+          export ACCESSIBILITY=$(jq '.categories.accessibility.score * 100' ./lighthouse-report/lighthouse.report.json)
+          export BEST_PRACTICES=$(jq '.categories."best-practices".score * 100' ./lighthouse-report/lighthouse.report.json)
+          export SEO=$(jq '.categories.seo.score * 100' ./lighthouse-report/lighthouse.report.json)
           echo "PERFORMANCE=$PERFORMANCE" >> $GITHUB_ENV
           echo "ACCESSIBILITY=$ACCESSIBILITY" >> $GITHUB_ENV
           echo "BEST_PRACTICES=$BEST_PRACTICES" >> $GITHUB_ENV
@@ -54,5 +57,5 @@ jobs:
           SEO: ${{ env.SEO }}
         run: |
           curl -X POST -H 'Content-type: application/json' --data "{
-            \"text\": \"Lighthouse CI Report for https://your-url.com:\nPerformance: $PERFORMANCE\nAccessibility: $ACCESSIBILITY\nBest Practices: $BEST_PRACTICES\nSEO: $SEO\"
+            \"text\": \"Lighthouse CI Report for https://briebug.com:\nPerformance: $PERFORMANCE\nAccessibility: $ACCESSIBILITY\nBest Practices: $BEST_PRACTICES\nSEO: $SEO\"
           }" $SLACK_WEBHOOK_URL
