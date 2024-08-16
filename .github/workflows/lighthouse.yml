@@ -26,7 +26,7 @@ jobs:
 
       - name: Run Lighthouse against URL
         run: |
-          REPORT_PATH=$(mktemp -d)/lighthouse.report.json
+          REPORT_PATH=$(mktemp -d)/lighthouse.manifest.json
           npm i -g @lhci/cli
           lhci collect --url=https://briebug.com --outputDir=$REPORT_PATH
           lhci upload --target=temporary-public-storage
