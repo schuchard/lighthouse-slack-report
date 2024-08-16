@@ -35,17 +35,16 @@ jobs:
 
       - name: List files and manifest in lighthouse-report directory
         run: |
-          ls -la $REPORT_PATH
           jq '.' $REPORT_PATH/manifest.json | jq
 
       - name: Extract Lighthouse Scores
         id: extract_scores
         run: |
           representative_run=$(jq '.[] | select(.isRepresentativeRun) | .summary' $REPORT_PATH/manifest.json)
-  
-          export PERFORMANCE=$(echo "$representative_run" | jq -r '.performance')
+          
+          export PERFORMANCE=$(( $(echo "$representative_run" | jq -r '.performance') * 100 ))
           export ACCESSIBILITY=$(echo "$representative_run" | jq -r '.accessibility')
-          export BEST_PRactices=$(echo "$representative_run" | jq -r '.["best-practices"]')
+          export BEST_PRACTICES=$(echo "$representative_run" | jq -r '.["best-practices"]')
           export SEO=$(echo "$representative_run" | jq -r '.seo')
         
           echo "PERFORMANCE=$PERFORMANCE" >> $GITHUB_ENV
