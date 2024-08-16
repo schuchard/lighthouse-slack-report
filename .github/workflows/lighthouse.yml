@@ -42,8 +42,8 @@ jobs:
         run: |
           representative_run=$(jq '.[] | select(.isRepresentativeRun) | .summary' $REPORT_PATH/manifest.json)
           
-          export PERFORMANCE=$(echo "$representative_run" | jq -r '.performance' | bc -l <<< "$REPLY * 100")
-          export ACCESSIBILITY=$(echo "$representative_run" | jq -r '.accessibility')
+          export PERFORMANCE=$(echo "$representative_run" | jq -r '.performance * 100')
+          export ACCESSIBILITY=$(echo "$representative_run" | jq -r '.accessibility * 100')
           export BEST_PRACTICES=$(echo "$representative_run" | jq -r '.["best-practices"]')
           export SEO=$(echo "$representative_run" | jq -r '.seo')
         
