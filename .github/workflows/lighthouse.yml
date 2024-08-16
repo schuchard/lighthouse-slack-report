@@ -33,7 +33,7 @@ jobs:
           lhci collect --url=https://briebug.com
           lhci upload --target=filesystem --outputDir="$REPORT_PATH"
 
-      - name: List files in lighthouse-report directory
+      - name: List files and manifest in lighthouse-report directory
         run: |
           ls -la $REPORT_PATH
           jq '.' $REPORT_PATH/manifest.json | jq
@@ -41,10 +41,13 @@ jobs:
       - name: Extract Lighthouse Scores
         id: extract_scores
         run: |
-          export PERFORMANCE=$(jq '.categories.performance.score * 100' ${{ env.REPORT_PATH }}/manifest.json)
-          export ACCESSIBILITY=$(jq '.categories.accessibility.score * 100' ${{ env.REPORT_PATH }}/manifest.json)
-          export BEST_PRACTICES=$(jq '.categories."best-practices".score * 100' ${{ env.REPORT_PATH }}/manifest.json)
-          export SEO=$(jq '.categories.seo.score * 100' ${{ env.REPORT_PATH }}/manifest.json)
+          representative_run=$(jq '.[] | select(.isRepresentativeRun) | .summary' $REPORT_PATH/manifest.json)
+  
+          export PERFORMANCE=$(echo "$representative_run" * 100 | jq -r '.performance')
+          export ACCESSIBILITY=$(echo "$representative_run" * 100 | jq -r '.accessibility')
+          export BEST_PRactices=$(echo "$representative_run" * 100 | jq -r '.["best-practices"]')
+          export SEO=$(echo "$representative_run" * 100 | jq -r '.seo')
+        
           echo "PERFORMANCE=$PERFORMANCE" >> $GITHUB_ENV
           echo "ACCESSIBILITY=$ACCESSIBILITY" >> $GITHUB_ENV
           echo "BEST_PRACTICES=$BEST_PRACTICES" >> $GITHUB_ENV
