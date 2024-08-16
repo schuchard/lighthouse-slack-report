@@ -26,7 +26,7 @@ jobs:
 
       - name: Run Lighthouse against URL
         run: |
-          REPORT_PATH=./$(mktemp -d)
+          REPORT_PATH=$(mktemp -d)
           npm i -g @lhci/cli
           echo "REPORT_PATH=$REPORT_PATH" >> $GITHUB_ENV
           echo "Report Path: $REPORT_PATH"
@@ -43,10 +43,10 @@ jobs:
         run: |
           representative_run=$(jq '.[] | select(.isRepresentativeRun) | .summary' $REPORT_PATH/manifest.json)
   
-          export PERFORMANCE=$(echo "$representative_run" * 100 | jq -r '.performance')
-          export ACCESSIBILITY=$(echo "$representative_run" * 100 | jq -r '.accessibility')
-          export BEST_PRactices=$(echo "$representative_run" * 100 | jq -r '.["best-practices"]')
-          export SEO=$(echo "$representative_run" * 100 | jq -r '.seo')
+          export PERFORMANCE=$(echo "$representative_run" | jq -r '.performance')
+          export ACCESSIBILITY=$(echo "$representative_run" | jq -r '.accessibility')
+          export BEST_PRactices=$(echo "$representative_run" | jq -r '.["best-practices"]')
+          export SEO=$(echo "$representative_run" | jq -r '.seo')
         
           echo "PERFORMANCE=$PERFORMANCE" >> $GITHUB_ENV
           echo "ACCESSIBILITY=$ACCESSIBILITY" >> $GITHUB_ENV
