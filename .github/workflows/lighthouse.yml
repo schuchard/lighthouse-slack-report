@@ -44,8 +44,8 @@ jobs:
           
           export PERFORMANCE=$(echo "$representative_run" | jq -r '.performance * 100')
           export ACCESSIBILITY=$(echo "$representative_run" | jq -r '.accessibility * 100')
-          export BEST_PRACTICES=$(echo "$representative_run" | jq -r '.["best-practices"]')
-          export SEO=$(echo "$representative_run" | jq -r '.seo')
+          export BEST_PRACTICES=$(echo "$representative_run" | jq -r '.["best-practices"] * 100')
+          export SEO=$(echo "$representative_run" | jq -r '.seo * 100')
         
           echo "PERFORMANCE=$PERFORMANCE" >> $GITHUB_ENV
           echo "ACCESSIBILITY=$ACCESSIBILITY" >> $GITHUB_ENV
