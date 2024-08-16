@@ -28,9 +28,10 @@ jobs:
         run: |
           REPORT_PATH=$(mktemp -d)
           npm i -g @lhci/cli
-          lhci collect --url=https://briebug.com --outputDir=./$REPORT_PATH
+          lhci collect --url=https://briebug.com --outputDir="./$REPORT_PATH"
           lhci upload --target=temporary-public-storage
           echo "REPORT_PATH=$REPORT_PATH" >> $GITHUB_ENV
+          echo "Report Path: $REPORT_PATH"
       - name: List files in lighthouse-report directory
         run: ls -la $REPORT_PATH
 
