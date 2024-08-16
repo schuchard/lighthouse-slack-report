@@ -26,15 +26,15 @@ jobs:
 
       - name: Run Lighthouse against URL
         run: |
-          REPORT_PATH=$(mktemp -d)
+          REPORT_PATH=./$(mktemp -d)
           npm i -g @lhci/cli
           echo "REPORT_PATH=$REPORT_PATH" >> $GITHUB_ENV
           echo "Report Path: $REPORT_PATH"
           lhci collect --url=https://briebug.com
-          lhci upload --target=filesystem --outputDir="./$REPORT_PATH"
+          lhci upload --target=filesystem --outputDir="$REPORT_PATH"
 
       - name: List files in lighthouse-report directory
-        run: ls -la ./$REPORT_PATH
+        run: ls -la $REPORT_PATH
 
       - name: Extract Lighthouse Scores
         id: extract_scores
