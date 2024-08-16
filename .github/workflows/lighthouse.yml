@@ -24,15 +24,11 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Set up Google Chrome
-        uses: cypress-io/github-action@v6
-        with:
-          browser: chrome
-          headed: true
-
       - name: Run Lighthouse against URL
         run: |
           REPORT_PATH=$(mktemp -d)/lighthouse.report.json
+          npm i puppeteer
+          npx @puppeteer/browsers install chrome@stable
           npx lighthouse https://briebug.com --output=json --output-path=$REPORT_PATH
           echo "REPORT_PATH=$REPORT_PATH" >> $GITHUB_ENV
 
