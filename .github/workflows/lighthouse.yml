@@ -60,7 +60,8 @@ jobs:
           BEST_PRACTICES: ${{ env.BEST_PRACTICES }}
           SEO: ${{ env.SEO }}
         run: |
+          current_date=$(date +"%m/%d/%Y")
           curl -X POST -H 'Content-type: application/json' --data "{
-            \"text\": \"Lighthouse Report for https://briebug.com:\nPerformance: $PERFORMANCE\nAccessibility: $ACCESSIBILITY\nBest Practices: $BEST_PRACTICES\nSEO: $SEO\"
+            \"text\": \"Lighthouse Report for https://briebug.com on $current_date\nPerformance: $PERFORMANCE\nAccessibility: $ACCESSIBILITY\nBest Practices: $BEST_PRACTICES\nSEO: $SEO\"
           }" $SLACK_WEBHOOK_URL
 
