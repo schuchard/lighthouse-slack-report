@@ -26,6 +26,8 @@ jobs:
           node-version: '20'
 
       - name: Run Lighthouse against URL
+        env:
+          LIGHTHOUSE_URL: ${{secrets.LIGHTHOUSE_URL}}
         run: |
           REPORT_PATH=$(mktemp -d)
           npm i -g @lhci/cli
@@ -55,6 +57,7 @@ jobs:
 
       - name: Post to Slack
         env:
+          LIGHTHOUSE_URL: ${{secrets.LIGHTHOUSE_URL}}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           PERFORMANCE: ${{ env.PERFORMANCE }}
           ACCESSIBILITY: ${{ env.ACCESSIBILITY }}
